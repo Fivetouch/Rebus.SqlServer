@@ -17,6 +17,6 @@ namespace Rebus.SqlServer
         /// <summary>
         /// Gets a wrapper with the current <see cref="SqlConnection"/> inside
         /// </summary>
-        Task<IDbConnection> GetConnectionWithLowIsolationlevel();
+        Task<IDbConnection> GetConnectionWithLowIsolationLevel();
     }
 }

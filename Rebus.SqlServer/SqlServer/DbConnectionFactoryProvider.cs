@@ -48,6 +48,14 @@ namespace Rebus.SqlServer
         }
 
         /// <summary>
+        /// Gets a nice ready-to-use database connection with an open transaction
+        /// </summary>
+        public async Task<IDbConnection> GetConnectionWithLowIsolationLevel()
+        {
+            return await GetConnection();
+        }
+
+        /// <summary>
         /// Gets/sets the isolation level used for transactions
         /// </summary>
         public IsolationLevel IsolationLevel { get; set; }

@@ -104,7 +104,7 @@ namespace Rebus.SqlServer
         /// <summary>
         /// Gets a nice ready-to-use database connection with an open transaction with low Isolation Level
         /// </summary>
-        public async Task<IDbConnection> GetConnectionWithLowIsolationlevel()
+        public async Task<IDbConnection> GetConnectionWithLowIsolationLevel()
         {
             SqlConnection connection = null;
 

@@ -61,6 +61,11 @@ namespace Rebus.SqlServer.Tests.Integration
                 return new Bimse(await _inner.GetConnection(), Interlocked.Increment(ref _counter), _activeConnections);
             }
 
+            public async Task<IDbConnection> GetConnectionWithLowIsolationLevel()
+            {
+                return await GetConnection();
+            }
+
             class Bimse : IDbConnection
             {
                 readonly IDbConnection _innerConnection;
