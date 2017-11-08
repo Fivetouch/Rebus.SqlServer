@@ -209,7 +209,8 @@ IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '{_t
 
         async Task UpdateLastReadTime(string id)
         {
-            using (var connection = await _connectionProvider.GetConnection())
+            //using (var connection = await _connectionProvider.GetConnection())
+            using (var connection = await _connectionProvider.GetConnectionWithLowIsolationLevel())
             {
                 await UpdateLastReadTime(id, connection);
                 await connection.Complete();

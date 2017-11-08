@@ -39,8 +39,8 @@ namespace Rebus.SqlServer
 
         string EnsureMarsIsEnabled(string connectionString)
         {
-            var connectionStringSettings = connectionString.Split(new [] {";"}, StringSplitOptions.RemoveEmptyEntries)
-                .Select(kvp => kvp.Split(new [] {"="}, StringSplitOptions.RemoveEmptyEntries))
+            var connectionStringSettings = connectionString.Split(new[] { ";" }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(kvp => kvp.Split(new[] { "=" }, StringSplitOptions.RemoveEmptyEntries))
                 .ToDictionary(kvp => kvp[0], kvp => string.Join("=", kvp.Skip(1)), StringComparer.OrdinalIgnoreCase);
 
             if (!connectionStringSettings.ContainsKey("MultipleActiveResultSets"))
@@ -57,8 +57,8 @@ namespace Rebus.SqlServer
         {
             var connectionStringSettings = ConfigurationManager.ConnectionStrings[connectionStringOrConnectionStringName];
 
-            return connectionStringSettings != null 
-                ? connectionStringSettings.ConnectionString 
+            return connectionStringSettings != null
+                ? connectionStringSettings.ConnectionString
                 : connectionStringOrConnectionStringName;
         }
 
@@ -76,7 +76,7 @@ namespace Rebus.SqlServer
                 using (new System.Transactions.TransactionScope(System.Transactions.TransactionScopeOption.Suppress))
                 {
                     connection = new SqlConnection(_connectionString);
-                    
+
                     // do not use Async here! it would cause the tx scope to be disposed on another thread than the one that created it
                     connection.Open();
                 }
@@ -100,5 +100,39 @@ namespace Rebus.SqlServer
         /// Gets/sets the isolation level used for transactions
         /// </summary>
         public IsolationLevel IsolationLevel { get; set; }
+
+        /// <summary>
+        /// Gets a nice ready-to-use database connection with an open transaction with low Isolation Level
+        /// </summary>
+        public async Task<IDbConnection> GetConnectionWithLowIsolationlevel()
+        {
+            SqlConnection connection = null;
+
+            try
+            {
+
+#if NET45
+                using (new System.Transactions.TransactionScope(System.Transactions.TransactionScopeOption.Suppress))
+                {
+                    connection = new SqlConnection(_connectionString);
+
+                    // do not use Async here! it would cause the tx scope to be disposed on another thread than the one that created it
+                    connection.Open();
+                }
+#else
+                connection = new SqlConnection(_connectionString);
+                connection.Open();
+#endif
+
+                var transaction = connection.BeginTransaction(IsolationLevel.ReadUncommitted);
+
+                return new DbConnectionWrapper(connection, transaction, false);
+            }
+            catch (Exception)
+            {
+                connection?.Dispose();
+                throw;
+            }
+        }
     }
 }
